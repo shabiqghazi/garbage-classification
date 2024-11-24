@@ -59,19 +59,7 @@
                         <h2 class="text-2xl font-bold text-gray-800">
                             {{ result }}
                         </h2>
-                        <p class="text-sm text-gray-500">Main Category</p>
-                    </div>
-
-                    <!-- Specific Class -->
-                    <div class="mb-6">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-medium text-gray-700">Specific Class:</span>
-                            <span class="text-sm font-semibold text-blue-600">{{ specific_class }}</span>
-                        </div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm font-medium text-gray-700">Confidence:</span>
-                            <span class="text-sm font-semibold text-blue-600">{{ "%.2f"|format(class_confidence) }}%</span>
-                        </div>
+                        <p class="text-sm text-gray-500">Category</p>
                     </div>
 
                     <!-- Category Confidence Bars -->
@@ -86,7 +74,7 @@
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2.5">
                                 <div class="bg-green-600 h-2.5 rounded-full transition-all duration-500"
-                                     style="width: '{{ organik_confidence }}%'"></div>
+                                     style="width: {{ organik_confidence }}%"></div>
                             </div>
                         </div>
 
@@ -98,7 +86,7 @@
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2.5">
                                 <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
-                                     style="width: '{{ non_organik_confidence }}%'"></div>
+                                     style="width: {{ non_organik_confidence }}%"></div>
                             </div>
                         </div>
                     </div>
