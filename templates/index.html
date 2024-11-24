@@ -4,34 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garbage Classification</title>
-    <!-- Tambahkan Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4 text-blue-600">Garbage Classification</h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Upload an image of garbage to classify it into organic or non-organic waste categories.
+            </p>
+        </div>
 
-    <div class="container mx-auto mt-10">
-        <div class="text-center">
-            <h1 class="text-4xl font-bold mb-6 text-blue-600">Garbage Classification</h1>
-            <p class="text-lg mb-8 text-gray-600">Upload an image of garbage and classify it into one of the predefined categories.</p>
-
-            <form method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-lg">
+        <!-- Upload Section -->
+        <div class="max-w-xl mx-auto">
+            <form method="POST" enctype="multipart/form-data" class="bg-white p-6 rounded-xl shadow-lg mb-8">
                 <div class="mb-4">
-                    <input type="file" name="file" class="border border-gray-300 rounded-md p-2 w-full">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="file">
+                        Choose an image to classify
+                    </label>
+                    <input type="file" 
+                           name="file" 
+                           id="file" 
+                           accept="image/*"
+                           class="block w-full text-sm text-gray-500
+                                  file:mr-4 file:py-2 file:px-4
+                                  file:rounded-md file:border-0
+                                  file:text-sm file:font-semibold
+                                  file:bg-blue-50 file:text-blue-700
+                                  hover:file:bg-blue-100
+                                  cursor-pointer">
                 </div>
-                <div>
-                    <input type="submit" value="Upload and Classify" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                </div>
+                <button type="submit" 
+                        class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg
+                               transition duration-300 ease-in-out transform hover:scale-[1.02]">
+                    Upload and Classify
+                </button>
             </form>
 
-            <!-- Hasil Prediksi -->
+            <!-- Results Section -->
             {% if result %}
-                <div class="mt-10 bg-green-100 p-4 rounded-lg shadow-lg">
-                    <h2 class="text-2xl font-semibold text-green-700">Prediction: {{ result }}</h2>
-                    <img src="{{ image_url }}" alt="Uploaded Image" class="mt-4 mx-auto max-w-xs border rounded-lg shadow">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <!-- Image Preview -->
+                <div class="relative h-64 bg-gray-100">
+                    <img src="{{ image_url }}" 
+                         alt="Uploaded Image" 
+                         class="w-full h-full object-contain">
                 </div>
+
+                <!-- Prediction Results -->
+                <div class="p-6">
+                    <!-- Main Category Result -->
+                    <div class="text-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            {{ result }}
+                        </h2>
+                        <p class="text-sm text-gray-500">Main Category</p>
+                    </div>
+
+                    <!-- Specific Class -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700">Specific Class:</span>
+                            <span class="text-sm font-semibold text-blue-600">{{ specific_class }}</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-medium text-gray-700">Confidence:</span>
+                            <span class="text-sm font-semibold text-blue-600">{{ "%.2f"|format(class_confidence) }}%</span>
+                        </div>
+                    </div>
+
+                    <!-- Category Confidence Bars -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-gray-700 mb-3">Category Confidence</h3>
+                        
+                        <!-- Organic Confidence -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Organic</span>
+                                <span class="text-sm font-medium text-gray-700">{{ "%.2f"|format(organik_confidence) }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-green-600 h-2.5 rounded-full transition-all duration-500"
+                                     style="width: '{{ organik_confidence }}%'"></div>
+                            </div>
+                        </div>
+
+                        <!-- Non-Organic Confidence -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm font-medium text-gray-700">Non-Organic</span>
+                                <span class="text-sm font-medium text-gray-700">{{ "%.2f"|format(non_organik_confidence) }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-500"
+                                     style="width: '{{ non_organik_confidence }}%'"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endif %}
         </div>
     </div>
-
 </body>
 </html>

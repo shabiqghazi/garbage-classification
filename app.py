@@ -16,45 +16,82 @@ model = load_model('model.h5')
 # Kelas sesuai dengan urutan kelas pada training
 class_labels = ['biological', 'cardboard', 'clothes', 'glass', 'metal', 'paper', 'plastic', 'shoes', 'trash']
 
+# Dictionary untuk mapping kelas ke kategori
+class_to_category = {
+    'biological': 'Organik',
+    'cardboard': 'Organik',
+    'paper': 'Organik',
+    'clothes': 'Non Organik',
+    'glass': 'Non Organik',
+    'metal': 'Non Organik',
+    'plastic': 'Non Organik',
+    'shoes': 'Non Organik',
+    'trash': 'Non Organik'
+}
+
 # Fungsi untuk memproses gambar dan melakukan prediksi
 def model_predict(image_path, model):
-    img = load_img(image_path, target_size=(128, 128))  # Sesuaikan ukuran dengan yang digunakan saat training
+    img = load_img(image_path, target_size=(128, 128))
     img = img_to_array(img)
-    img = np.expand_dims(img, axis=0)  # Ubah menjadi bentuk batch
-    img = img / 255.0  # Normalisasi gambar seperti yang dilakukan di training
+    img = np.expand_dims(img, axis=0)
+    img = img / 255.0
 
-    pred = model.predict(img)
-    pred_class = np.argmax(pred, axis=1)
-    return class_labels[pred_class[0]]
+    # Dapatkan prediksi
+    predictions = model.predict(img)
+    
+    # Dapatkan indeks kelas dengan probabilitas tertinggi
+    pred_class_index = np.argmax(predictions, axis=1)[0]
+    
+    # Dapatkan probabilitas untuk kelas yang diprediksi
+    confidence = predictions[0][pred_class_index] * 100
+    
+    # Dapatkan label kelas
+    predicted_class = class_labels[pred_class_index]
+    
+    # Dapatkan kategori (Organik/Non Organik)
+    category = class_to_category[predicted_class]
+    
+    # Hitung total confidence untuk masing-masing kategori
+    organik_confidence = sum(predictions[0][i] for i, label in enumerate(class_labels) 
+                           if class_to_category[label] == 'Organik') * 100
+    non_organik_confidence = sum(predictions[0][i] for i, label in enumerate(class_labels) 
+                                if class_to_category[label] == 'Non Organik') * 100
+    
+    return {
+        'category': category,
+        'specific_class': predicted_class,
+        'class_confidence': confidence,
+        'organik_confidence': organik_confidence,
+        'non_organik_confidence': non_organik_confidence
+    }
 
 # Halaman utama untuk mengunggah gambar
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
-        # Jika ada file yang diunggah
         if 'file' not in request.files:
             return redirect(request.url)
         
         file = request.files['file']
         
-        # Jika pengguna tidak memilih file
         if file.filename == '':
             return redirect(request.url)
         
         if file:
-            # Simpan file yang diunggah ke folder uploads
+            # Simpan file yang diunggah
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
             file.save(file_path)
 
-            # Lakukan prediksi menggunakan model yang dilatih
+            # Lakukan prediksi
             result = model_predict(file_path, model)
-            if result in ['biological', 'cardboard', 'paper']:
-                result = "Organik"
-            else:
-                result = "Non Organik"
-
-            # Tampilkan hasil di halaman web
-            return render_template('index.html', result=result, image_url=file_path)
+            
+            return render_template('index.html',
+                result=result['category'],
+                specific_class=result['specific_class'],
+                class_confidence=result['class_confidence'],
+                organik_confidence=result['organik_confidence'],
+                non_organik_confidence=result['non_organik_confidence'],
+                image_url=file_path)
     
     return render_template('index.html', result=None)
 
